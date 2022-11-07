@@ -3,7 +3,8 @@ import * as  mapboxgl from 'mapbox-gl';
 
 interface markerColor {
   color: string;
-  marker :mapboxgl.Marker
+  marker ?: mapboxgl.Marker;
+  center ?: [number, number]
 }
 
 @Component({
@@ -49,6 +50,8 @@ export class MarcadoresComponent implements AfterViewInit {
      zoom: this.zoomLevel
    });
 
+   this.readMarkerToLocalStorage()
+
   //  const markerHtml : HTMLElement = document.createElement('div');
   //  markerHtml.innerHTML = 'como quiero el pin'
   // new mapboxgl.Marker({
@@ -75,11 +78,67 @@ addMarker(){
     color,
     marker: newMarker
   })
+
+  this.saveMarkerLocalStorage();
+
+  newMarker.on('dragend', () =>{
+    this.saveMarkerLocalStorage();
+  })
 }
 
 goToMarker( marker : mapboxgl.Marker) {
 this.map.flyTo({
   center: marker.getLngLat()
 })
+}
+
+saveMarkerLocalStorage(){
+
+  const lngLatArr : markerColor[] =[]
+
+  this.markers.forEach( m => {
+    const color = m.color;
+    const {lng,lat}= m.marker!.getLngLat();
+
+    lngLatArr.push({
+      color : color,
+      center: [lng ,  lat]
+    });
+  })
+
+  localStorage.setItem('markers', JSON.stringify(lngLatArr))
+}
+
+readMarkerToLocalStorage(){
+  if(!localStorage.getItem('markers')){return}
+
+  const lngLatArr: markerColor[] = JSON.parse(localStorage.getItem('markers')!);
+
+lngLatArr.forEach( m => {
+  const newMarker = new mapboxgl.Marker({
+
+    color: m.color,
+    draggable:true,
+  })
+  .setLngLat(m.center!)
+  .addTo(this.map);
+
+  this.markers.push({
+    marker: newMarker,
+    color: m.color
+  });
+
+newMarker.on('dragend', () =>{
+  this.saveMarkerLocalStorage();
+})
+
+})
+
+}
+
+deleteMarker( i :number ){
+  this.markers[i].marker?.remove();
+  this.markers.splice(i, 1);
+  this.saveMarkerLocalStorage();
 }
 }
