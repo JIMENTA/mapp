@@ -39,7 +39,6 @@ export class MarcadoresComponent implements AfterViewInit {
 
   markers :markerColor[]=[];
 
-
   constructor() { }
 
   ngAfterViewInit(): void {
@@ -49,9 +48,9 @@ export class MarcadoresComponent implements AfterViewInit {
      center:this.center,
      zoom: this.zoomLevel
    });
-
-   this.readMarkerToLocalStorage()
-
+ 
+   this.readMarkerToLocalStorage();
+  // REFERENCIA COMO PERSONALIZAR / NO LA USO
   //  const markerHtml : HTMLElement = document.createElement('div');
   //  markerHtml.innerHTML = 'como quiero el pin'
   // new mapboxgl.Marker({
@@ -59,32 +58,30 @@ export class MarcadoresComponent implements AfterViewInit {
   //   })
   //  .setLngLat( this.center)
   //  .addTo( this.map)
-  // }
-}
-
-addMarker(){
-  const color = "#xxxxxx".replace(/x/g, y=>(Math.random()*16|0).toString(16));
+  }
 
 
-  const newMarker = new mapboxgl.Marker(
-    {draggable:true , // para moverlo
-      color} 
-    
-  )
-  .setLngLat( this.center)
-  .addTo( this.map)
+  addMarker(){
+     const color = "#xxxxxx".replace(/x/g, y=>(Math.random()*16|0).toString(16));
+    const newMarker = new mapboxgl.Marker({draggable:true, color})
+    .setLngLat(this.center)
+    .addTo(this.map);
 
-  this.markers.push({
-    color,
-    marker: newMarker
-  })
-
-  this.saveMarkerLocalStorage();
-
-  newMarker.on('dragend', () =>{
+    this.markers.push({
+      color,
+      marker: newMarker
+    })
+  
     this.saveMarkerLocalStorage();
-  })
-}
+  
+    newMarker.on('dragend', () =>{
+      this.saveMarkerLocalStorage();
+    })
+  }
+  
+
+ 
+
 
 goToMarker( marker : mapboxgl.Marker) {
 this.map.flyTo({
@@ -141,4 +138,6 @@ deleteMarker( i :number ){
   this.markers.splice(i, 1);
   this.saveMarkerLocalStorage();
 }
+
 }
+    
